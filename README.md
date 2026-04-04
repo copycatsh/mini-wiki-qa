@@ -27,6 +27,7 @@ Built with **LangChain/LangGraph**, **FastAPI**, **Qdrant**, and **Ollama** on *
 | **Experiment Tracking** | MLflow |
 | **Automation** | n8n |
 | **Storage** | MinIO |
+| **Frontend** | Next.js 14, React, shadcn/ui, Tailwind CSS |
 | **Containerization** | Docker Compose |
 
 ---
@@ -74,6 +75,8 @@ docker compose exec api python /scripts/visualize_graph.py
 - `GET /health` — Service health check (Qdrant, LLM, MLflow)
 - `POST /ask` — LangChain pipeline (retrieve → rerank → generate)
 - `POST /ask-graph` — LangGraph pipeline with safety layers
+- `POST /ask/stream` — SSE streaming (LangChain pipeline)
+- `POST /ask-graph/stream` — SSE streaming (LangGraph pipeline)
 - `POST /ingest` — Trigger document ingestion pipeline
 
 
@@ -144,6 +147,7 @@ mini-wiki-qa/
 │   │   └── routers/
 │   │       ├── health.py     # GET /, GET /health
 │   │       ├── ask.py        # POST /ask, POST /ask-graph
+│   │       ├── stream.py     # POST /ask/stream, POST /ask-graph/stream (SSE)
 │   │       └── admin.py      # POST /ingest
 │   ├── services/
 │   │   └── rag_service.py    # RAG orchestration (retrieve → rerank → generate)
@@ -156,6 +160,15 @@ mini-wiki-qa/
 │   ├── documents/            # Your .md files
 │   └── golden_set/           # Q&A pairs for evaluation
 ├── scripts/                  # Utility scripts
+├── frontend/                 # Next.js 14 chat UI
+│   ├── src/
+│   │   ├── app/              # Next.js app router pages
+│   │   ├── components/       # Chat, sidebar, and UI components
+│   │   ├── hooks/            # useChat SSE streaming hook
+│   │   ├── lib/              # API client, utilities
+│   │   └── types/            # TypeScript type definitions
+│   ├── Dockerfile
+│   └── package.json
 ├── compose.yml               # Docker services
 ├── Makefile                  # Automation commands
 ├── .env.example              # Environment template
@@ -199,6 +212,7 @@ make test               # Test all services
 
 | Service | URL | Description |
 |---------|-----|-------------|
+| **Frontend** | http://localhost:3000 | Chat UI (Next.js) |
 | **API** | http://localhost:8000/docs | FastAPI Swagger UI |
 | **Qdrant** | http://localhost:6333/dashboard | Vector database |
 | **MLflow** | http://localhost:5001 | Experiment tracking |
@@ -271,6 +285,8 @@ kill -9 [PID]
 - [x] MinIO integration (S3-compatible storage)
 
 ### Planned 🔮
+- [x] SSE streaming endpoints
+- [x] Chat UI frontend (Next.js 14)
 - [ ] n8n integrations (Telegram bot, Google Sheets)
 - [ ] Production deployment with Ollama
 - [ ] Fine-tuning (embeddings, reranker, LLM)
