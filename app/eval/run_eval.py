@@ -4,7 +4,8 @@ import mlflow
 from pathlib import Path
 
 from eval.metrics import RAGEvaluator
-from rag.retrieval import get_retriever
+from rag.retrieval import DocumentRetriever
+from rag.reranker import DocumentReranker
 from core.config import settings
 
 logging.basicConfig(
@@ -18,7 +19,8 @@ def run_evaluation(
         golden_set_path: str = "/data/golden_set/squad_qa.json",
         top_k: int = 5,
         sample_size: int = None,
-        experiment_name: str = "rag-baseline"
+        use_rerank: bool = False,
+        experiment_name: str = None,
 ):
     """
     Run evaluation and log to MLflow
@@ -27,53 +29,50 @@ def run_evaluation(
         golden_set_path: Path to golden set
         top_k: Number of documents to retrieve
         sample_size: Number of samples (None = all)
-        experiment_name: MLflow experiment name
+        use_rerank: Whether to apply reranking
+        experiment_name: MLflow experiment name (auto-generated if None)
     """
-    logger.info("🚀 Starting evaluation...")
+    if experiment_name is None:
+        experiment_name = "rag-with-rerank" if use_rerank else "rag-baseline"
 
-    # Set MLflow tracking URI and experiment
+    logger.info(f"Starting evaluation (rerank={use_rerank})...")
+
     mlflow.set_tracking_uri(settings.MLFLOW_TRACKING_URI)
     mlflow.set_experiment(experiment_name)
 
-    # Initialize components
-    logger.info("Initializing retriever...")
-    retriever = get_retriever()
+    retriever = DocumentRetriever()
+    reranker = DocumentReranker() if use_rerank else None
 
-    logger.info("Loading golden set...")
     evaluator = RAGEvaluator(golden_set_path)
 
-    # Start MLflow run
     with mlflow.start_run():
-        # Log parameters
         mlflow.log_param("top_k", top_k)
         mlflow.log_param("chunk_size", settings.CHUNK_SIZE)
         mlflow.log_param("chunk_overlap", settings.CHUNK_OVERLAP)
         mlflow.log_param("embedding_model", settings.EMBEDDING_MODEL)
+        mlflow.log_param("use_rerank", use_rerank)
         mlflow.log_param("sample_size", sample_size or len(evaluator.golden_set))
 
-        # Run evaluation
-        logger.info("Running evaluation...")
         results = evaluator.evaluate(
             retriever=retriever,
             top_k=top_k,
-            sample_size=sample_size
+            sample_size=sample_size,
+            use_rerank=use_rerank,
+            reranker=reranker,
         )
 
-        # Log metrics
         mlflow.log_metric("recall_at_3", results["recall@3"])
         mlflow.log_metric("recall_at_5", results["recall@5"])
         mlflow.log_metric("mrr", results["mrr"])
         mlflow.log_metric("avg_latency_ms", results["avg_latency_ms"])
 
-        # Log results as artifact
         results_path = Path("/tmp/eval_results.json")
         import json
         with open(results_path, 'w') as f:
             json.dump(results, f, indent=2)
         mlflow.log_artifact(str(results_path))
 
-        logger.info("✅ Evaluation complete!")
-        logger.info(f"📊 Results:")
+        logger.info("Evaluation complete!")
         logger.info(f"  Recall@3: {results['recall@3']:.3f}")
         logger.info(f"  Recall@5: {results['recall@5']:.3f}")
         logger.info(f"  MRR: {results['mrr']:.3f}")
@@ -83,9 +82,15 @@ def run_evaluation(
 
 
 if __name__ == "__main__":
-    # Run baseline evaluation
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rerank", action="store_true", help="Enable reranking")
+    parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument("--samples", type=int, default=50)
+    args = parser.parse_args()
+
     run_evaluation(
-        top_k=5,
-        sample_size=50,  # Evaluate on 50 samples for speed
-        experiment_name="rag-baseline"
+        top_k=args.top_k,
+        sample_size=args.samples,
+        use_rerank=args.rerank,
     )
