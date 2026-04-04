@@ -71,8 +71,10 @@ docker compose exec api python /scripts/visualize_graph.py
 - 📊 **MLflow + MinIO** — Experiment tracking with S3 storage
 
 ### Available Endpoints
-- `/ask` — LangChain pipeline
-- `/ask-graph` — LangGraph pipeline with safety layers
+- `GET /health` — Service health check (Qdrant, LLM, MLflow)
+- `POST /ask` — LangChain pipeline (retrieve → rerank → generate)
+- `POST /ask-graph` — LangGraph pipeline with safety layers
+- `POST /ingest` — Trigger document ingestion pipeline
 
 
 ## 📋 Prerequisites
@@ -125,8 +127,9 @@ make ui-all
 python scripts/download_squad.py
 ```
 #### Ingest documents
-```
-docker compose run --rm api python -m rag.ingest
+```bash
+# Via API endpoint (recommended)
+curl -X POST http://localhost:8000/ingest -H "X-API-Key: $API_SHARED_SECRET"
 ```
 ---
 
@@ -134,18 +137,28 @@ docker compose run --rm api python -m rag.ingest
 ```
 mini-wiki-qa/
 ├── app/
-│   ├── api/              # FastAPI endpoints
-│   ├── rag/              # RAG pipeline (ingest, retrieval, generation)
-│   ├── eval/             # Evaluation scripts
-│   ├── safety/           # Safety layers (PII, injection guard)
+│   ├── api/
+│   │   ├── main.py           # App init, lifespan DI, router registration
+│   │   ├── schemas.py        # Pydantic request/response models
+│   │   ├── dependencies.py   # FastAPI dependency injection
+│   │   └── routers/
+│   │       ├── health.py     # GET /, GET /health
+│   │       ├── ask.py        # POST /ask, POST /ask-graph
+│   │       └── admin.py      # POST /ingest
+│   ├── services/
+│   │   └── rag_service.py    # RAG orchestration (retrieve → rerank → generate)
+│   ├── rag/                  # RAG components (retrieval, generation, reranking, safety, graph)
+│   ├── core/                 # Configuration (settings from env)
+│   ├── eval/                 # Evaluation scripts
+│   ├── tests/                # Unit + integration tests
 │   └── Dockerfile
 ├── data/
-│   ├── documents/        # Your .md files (30-50 docs)
-│   └── golden_set/       # Q&A pairs for evaluation
-├── scripts/              # Utility scripts
-├── compose.yml           # Docker services
-├── Makefile              # Automation commands
-├── .env.example          # Environment template
+│   ├── documents/            # Your .md files
+│   └── golden_set/           # Q&A pairs for evaluation
+├── scripts/                  # Utility scripts
+├── compose.yml               # Docker services
+├── Makefile                  # Automation commands
+├── .env.example              # Environment template
 └── README.md
 ```
 

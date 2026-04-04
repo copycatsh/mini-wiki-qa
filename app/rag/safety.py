@@ -118,24 +118,3 @@ class InjectionGuard:
             "detected_patterns": detected_patterns,
             "risk_level": "high" if detected_patterns else "none"
         }
-
-
-# Global instances
-_pii_scrubber = None
-_injection_guard = None
-
-
-def get_pii_scrubber() -> PIIScrubber:
-    """Get or create PII scrubber instance"""
-    global _pii_scrubber
-    if _pii_scrubber is None:
-        _pii_scrubber = PIIScrubber()
-    return _pii_scrubber
-
-
-def get_injection_guard() -> InjectionGuard:
-    """Get or create injection guard instance"""
-    global _injection_guard
-    if _injection_guard is None:
-        _injection_guard = InjectionGuard()
-    return _injection_guard

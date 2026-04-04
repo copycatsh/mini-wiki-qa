@@ -14,8 +14,7 @@ class DocumentRetriever:
     """Handles semantic search in Qdrant"""
 
     def __init__(self):
-        """Initialize retriever with embeddings and vector store"""
-        # Initialize embeddings
+        """Initialize retriever with embeddings and Qdrant client"""
         logger.info("Initializing retriever...")
         self.embeddings = HuggingFaceEmbeddings(
             model_name=settings.EMBEDDING_MODEL,
@@ -23,15 +22,18 @@ class DocumentRetriever:
             encode_kwargs={'normalize_embeddings': True}
         )
 
-        # Initialize Qdrant client
         self.client = QdrantClient(url=settings.QDRANT_URL)
+        self._vectorstore = None
 
-        # Initialize vector store
-        self.vectorstore = QdrantVectorStore(
-            client=self.client,
-            collection_name=settings.QDRANT_COLLECTION,
-            embedding=self.embeddings
-        )
+    @property
+    def vectorstore(self):
+        if self._vectorstore is None:
+            self._vectorstore = QdrantVectorStore(
+                client=self.client,
+                collection_name=settings.QDRANT_COLLECTION,
+                embedding=self.embeddings
+            )
+        return self._vectorstore
 
     def retrieve(self, query: str, top_k: int = 5) -> List[Dict]:
         """
@@ -63,15 +65,3 @@ class DocumentRetriever:
 
         logger.info(f"Retrieved {len(chunks)} chunks")
         return chunks
-
-
-# Global retriever instance
-_retriever = None
-
-
-def get_retriever() -> DocumentRetriever:
-    """Get or create global retriever instance"""
-    global _retriever
-    if _retriever is None:
-        _retriever = DocumentRetriever()
-    return _retriever

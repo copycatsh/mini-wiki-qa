@@ -62,15 +62,3 @@ class DocumentReranker:
 
         logger.info(f"Reranking complete, returning top-{len(reranked)} chunks")
         return reranked
-
-
-# Global reranker instance
-_reranker = None
-
-
-def get_reranker() -> DocumentReranker:
-    """Get or create global reranker instance"""
-    global _reranker
-    if _reranker is None:
-        _reranker = DocumentReranker()
-    return _reranker
