@@ -7,9 +7,11 @@ interface MobileSettingsProps {
   onPipelineChange: (pipeline: Pipeline) => void;
   useRerank: boolean;
   onRerankChange: (useRerank: boolean) => void;
+  useMultiQuery: boolean;
+  onMultiQueryChange: (useMultiQuery: boolean) => void;
 }
 
-export function MobileSettings({ pipeline, onPipelineChange, useRerank, onRerankChange }: MobileSettingsProps) {
+export function MobileSettings({ pipeline, onPipelineChange, useRerank, onRerankChange, useMultiQuery, onMultiQueryChange }: MobileSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -57,6 +59,18 @@ export function MobileSettings({ pipeline, onPipelineChange, useRerank, onRerank
                 className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useRerank ? "bg-accent" : "bg-border"}`}
               >
                 <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useRerank ? "translate-x-[18px]" : ""}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="font-sans text-sm text-text">Multi-query</span>
+              <button
+                role="switch"
+                aria-checked={useMultiQuery}
+                aria-label="Enable multi-query expansion"
+                onClick={() => onMultiQueryChange(!useMultiQuery)}
+                className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useMultiQuery ? "bg-accent" : "bg-border"}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useMultiQuery ? "translate-x-[18px]" : ""}`} />
               </button>
             </div>
           </div>
