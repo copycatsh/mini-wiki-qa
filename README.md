@@ -24,7 +24,7 @@ Open http://localhost:3000 for the chat UI, or http://localhost:8000/docs for th
 | Embeddings | sentence-transformers/all-MiniLM-L6-v2 |
 | Reranker | cross-encoder/ms-marco-MiniLM-L-6-v2 |
 | Experiment Tracking | MLflow + MinIO |
-| Automation | n8n |
+| Automation | n8n (optional, via profile) |
 
 ## Architecture
 
@@ -55,7 +55,10 @@ See [docs/architecture.md](docs/architecture.md) for full diagrams and component
 | Qdrant | http://localhost:6333/dashboard |
 | MLflow | http://localhost:5001 |
 | MinIO | http://localhost:9001 |
-| n8n | http://localhost:5678 |
+
+Optional services (start with `docker compose --profile <name> up`):
+- **automation**: n8n (http://localhost:5678)
+- **production**: Ollama (http://localhost:11434)
 
 ## Data Ingestion
 
