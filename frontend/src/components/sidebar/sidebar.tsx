@@ -7,9 +7,11 @@ interface SidebarProps {
   onPipelineChange: (pipeline: Pipeline) => void;
   useRerank: boolean;
   onRerankChange: (useRerank: boolean) => void;
+  useMultiQuery: boolean;
+  onMultiQueryChange: (useMultiQuery: boolean) => void;
 }
 
-export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange }: SidebarProps) {
+export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange, useMultiQuery, onMultiQueryChange }: SidebarProps) {
   return (
     <aside className="w-sidebar min-w-[240px] bg-sidebar border-r border-border px-4 py-5 flex flex-col gap-6 max-lg:hidden">
       <h1 className="font-serif text-xl text-text">Mini Wiki Q&A</h1>
@@ -41,13 +43,26 @@ export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange 
             <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useRerank ? "translate-x-[18px]" : ""}`} />
           </button>
         </div>
+        <div className="flex items-center justify-between py-1.5">
+          <span className="font-sans text-[13px] text-text">Multi-query</span>
+          <button
+            role="switch"
+            aria-checked={useMultiQuery}
+            aria-label="Enable multi-query expansion"
+            onClick={() => onMultiQueryChange(!useMultiQuery)}
+            className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useMultiQuery ? "bg-accent" : "bg-border"}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useMultiQuery ? "translate-x-[18px]" : ""}`} />
+          </button>
+        </div>
       </div>
 
       <div className="mt-auto">
         <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-muted mb-2.5">Info</div>
         <div className="font-mono text-[11px] text-text-muted leading-relaxed">
           Pipeline: {pipeline}<br />
-          Rerank: {useRerank ? "on" : "off"}
+          Rerank: {useRerank ? "on" : "off"}<br />
+          Multi-query: {useMultiQuery ? "on" : "off"}
         </div>
       </div>
 

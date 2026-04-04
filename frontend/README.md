@@ -21,20 +21,20 @@ src/
 ├── app/              # Next.js app router (layout, page, providers)
 ├── components/
 │   ├── chat/         # ChatMessage, ChatInput, CitationList, EmptyState, MetadataTags
-│   ├── sidebar/      # Sidebar, ThemeToggle, MobileSettings (bottom sheet)
+│   ├── sidebar/      # Sidebar (pipeline, rerank, multi-query toggles), ThemeToggle, MobileSettings
 │   └── ui/           # shadcn/ui primitives (button, input, select, sheet, etc.)
 ├── hooks/
-│   └── use-chat.ts   # Core hook: SSE streaming, message state, abort control
+│   └── use-chat.ts   # Core hook: SSE streaming, message state, conversation history, abort control
 ├── lib/
 │   ├── api.ts        # API client with streamAsk() async generator
 │   └── utils.ts      # Tailwind merge utility
 └── types/
-    └── chat.ts       # ChatMessage, Citation, SSEEvent, Pipeline types
+    └── chat.ts       # ChatMessage, Citation, AskRequest, HistoryMessage, SSEEvent, Pipeline types
 ```
 
 ## SSE Streaming
 
-The `useChat` hook connects to `/ask/stream` or `/ask-graph/stream` via `fetch` + `ReadableStream`. Events flow as:
+The `useChat` hook connects to `/ask/stream` or `/ask-graph/stream` via `fetch` + `ReadableStream`. Each request includes the last 5 conversation pairs as history for context-aware answers. Events flow as:
 
 1. `token` — streamed text chunks appended to the message
 2. `citations` — source documents with relevance scores

@@ -12,11 +12,12 @@ import { MobileSettings } from "@/components/sidebar/mobile-settings";
 export default function Home() {
   const [pipeline, setPipeline] = useState<Pipeline>("/ask");
   const [useRerank, setUseRerank] = useState(false);
+  const [useMultiQuery, setUseMultiQuery] = useState(false);
   const { messages, isStreaming, sendMessage, stopStreaming } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleSend = (query: string) => {
-    sendMessage(query, pipeline, useRerank);
+    sendMessage(query, pipeline, useRerank, useMultiQuery);
   };
 
   useEffect(() => {
@@ -30,6 +31,8 @@ export default function Home() {
         onPipelineChange={setPipeline}
         useRerank={useRerank}
         onRerankChange={setUseRerank}
+        useMultiQuery={useMultiQuery}
+        onMultiQueryChange={setUseMultiQuery}
       />
 
       <main className="flex-1 flex flex-col min-w-0">
@@ -38,6 +41,8 @@ export default function Home() {
           onPipelineChange={setPipeline}
           useRerank={useRerank}
           onRerankChange={setUseRerank}
+          useMultiQuery={useMultiQuery}
+          onMultiQueryChange={setUseMultiQuery}
         />
         {messages.length === 0 ? (
           <EmptyState onSuggestionClick={handleSend} />

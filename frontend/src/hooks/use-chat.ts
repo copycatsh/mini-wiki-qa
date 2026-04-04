@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { streamAsk } from "@/lib/api";
-import { ChatMessage, Citation, Pipeline } from "@/types/chat";
+import { ChatMessage, Citation, HistoryMessage, Pipeline } from "@/types/chat";
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -12,9 +12,18 @@ export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   const sendMessage = useCallback(
-    async (query: string, pipeline: Pipeline, useRerank?: boolean) => {
+    async (query: string, pipeline: Pipeline, useRerank?: boolean, useMultiQuery?: boolean) => {
+      const MAX_HISTORY_PAIRS = 5;
+
+      const history: HistoryMessage[] = messagesRef.current
+        .filter((m) => !m.isStreaming && !m.error && m.content.length > 0)
+        .slice(-(MAX_HISTORY_PAIRS * 2))
+        .map(({ role, content }) => ({ role, content }));
+
       const userMsg: ChatMessage = {
         id: generateId(),
         role: "user",
@@ -37,7 +46,7 @@ export function useChat() {
       try {
         const stream = streamAsk(
           pipeline,
-          { query, use_rerank: useRerank },
+          { query, use_rerank: useRerank, use_multi_query: useMultiQuery, history },
           controller.signal,
         );
 
