@@ -159,8 +159,10 @@ Tests override dependencies via `app.dependency_overrides`. See [ADR-002](decisi
 | qdrant | qdrant/qdrant:v1.10.0 | 6333, 6334 | Vector database |
 | mlflow | ghcr.io/mlflow/mlflow | 5001 | Experiment tracking |
 | minio | minio/minio | 9000, 9001 | Object storage (MLflow artifacts) |
-| n8n | n8nio/n8n | 5678 | Workflow automation |
-| ollama | ollama/ollama | 11434 | LLM server (production) |
+| n8n | n8nio/n8n | 5678 | Workflow automation (profile: `automation`) |
+| ollama | ollama/ollama | 11434 | LLM server (profile: `production`) |
+
+n8n and ollama use Docker Compose profiles and don't start by default. Activate with `docker compose --profile <name> up`.
 
 LM Studio runs on the host machine (not in Docker) at port 1234 and is accessed via `host.docker.internal`.
 
