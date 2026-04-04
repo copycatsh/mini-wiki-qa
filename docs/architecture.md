@@ -26,19 +26,25 @@ Two pipelines serve the same purpose with different safety guarantees.
 
 ### Basic Pipeline
 
-**`/ask`** (sync, no safety layers):
+**`/ask`** (sync, with injection guard):
 
 ```
-  Query → Retrieve → Rerank (optional) → Generate → Response
+  Query + History
+    │
+    ▼
+  InjectionGuard (query + history) ── blocked ──► 400 Error
+    │ safe
+    ▼
+  Retrieve → Rerank (optional) → Generate (with history) → Response
 ```
 
 **`/ask/stream`** (SSE streaming, with injection guard):
 
 ```
-  Query
+  Query + History
     │
     ▼
-  InjectionGuard ── blocked ──► Error response
+  InjectionGuard (query + history) ── blocked ──► Error event
     │ safe
     ▼
   Retrieve (Qdrant semantic search)
@@ -47,13 +53,13 @@ Two pipelines serve the same purpose with different safety guarantees.
   Rerank (optional, cross-encoder)
     │
     ▼
-  Generate (LLM.astream → SSE tokens)
+  Generate (LLM.astream with history → SSE tokens)
     │
     ▼
   Citations + Metadata + Done
 ```
 
-Note: `/ask` does not have injection guard protection. Use `/ask-graph` or `/ask/stream` for safety-filtered queries.
+All endpoints accept an optional `history` field (list of prior user/assistant messages) for conversational context. History is validated by Pydantic (`HistoryMessage` model) and checked by the injection guard before reaching the LLM.
 
 ### Graph Pipeline (`/ask-graph`, `/ask-graph/stream`)
 
@@ -85,7 +91,7 @@ Note: `/ask` does not have injection guard protection. Use `/ask-graph` or `/ask
          END
 ```
 
-Implemented as a LangGraph `StateGraph` with conditional edges. The `injection_guard` node routes to `END` if the query is unsafe, skipping the rest of the pipeline.
+Implemented as a LangGraph `StateGraph` with conditional edges. The `injection_guard` node checks both the query and any history messages, routing to `END` if unsafe.
 
 The streaming variant (`/ask-graph/stream`) runs the full graph via `ainvoke()`, then word-splits the completed answer into SSE token events. This is simulated streaming, not real token streaming. See [ADR-004](decisions/004-sse-streaming.md).
 
@@ -173,7 +179,8 @@ app/
 ├── api/
 │   ├── main.py             # Lifespan DI, CORS, router registration
 │   ├── dependencies.py     # Depends() factories
-│   ├── schemas.py          # Pydantic models
+│   ├── schemas.py          # Pydantic models (AskRequest, HistoryMessage, etc.)
+│   ├── utils.py            # Shared router utilities (history serialization, injection checks)
 │   └── routers/
 │       ├── health.py       # GET /, GET /health
 │       ├── ask.py          # POST /ask, POST /ask-graph

@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 build/
 develop-eggs/
@@ -40,20 +41,17 @@ wheels/
 .LSOverride
 
 # Docker
-docker-compose.override.yml
+compose.override.yml
 
 # Data
-data/documents/*.md
+data/documents/*/
 !data/documents/.gitkeep
 data/golden_set/*.json
 !data/golden_set/.gitkeep
 
-# Allow visualization files
-!data/rag_pipeline.png
-!data/rag_pipeline.svg
-!data/rag_pipeline_visualization.txt
-
-
+# Node
+node_modules/
+frontend/.next/
 
 # MLflow
 mlruns/
@@ -73,4 +71,3 @@ tmp/
 temp/
 .gstack/
 docs/plans/
-data/documents/squad

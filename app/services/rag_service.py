@@ -1,7 +1,7 @@
 """RAG service layer — orchestrates retrieval, reranking, and generation"""
 import asyncio
 import logging
-from typing import List, Dict, AsyncGenerator, Tuple, Any
+from typing import List, Dict, Optional, AsyncGenerator, Tuple, Any
 from core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,10 @@ class RAGService:
         self.generator = generator
         self.reranker = reranker
 
-    def ask(self, query: str, top_k: int = 5, use_rerank: bool = False) -> dict:
+    def ask(
+        self, query: str, top_k: int = 5, use_rerank: bool = False,
+        history: Optional[List[Dict]] = None,
+    ) -> dict:
         logger.info(f"Processing query: {query[:50]}...")
         chunks = self.retriever.retrieve(query, top_k=top_k)
 
@@ -21,7 +24,7 @@ class RAGService:
             logger.info("Applying reranking...")
             chunks = self.reranker.rerank(query, chunks, top_k=top_k)
 
-        answer = self.generator.generate(query, chunks)
+        answer = self.generator.generate(query, chunks, history=history)
 
         citations = [
             {
@@ -40,17 +43,15 @@ class RAGService:
         }
 
     async def ask_stream(
-        self, query: str, top_k: int = 5, use_rerank: bool = False
+        self, query: str, top_k: int = 5, use_rerank: bool = False,
+        history: Optional[List[Dict]] = None,
     ) -> AsyncGenerator[Tuple[str, Any], None]:
         try:
             chunks = await asyncio.to_thread(self.retriever.retrieve, query, top_k=top_k)
             if use_rerank:
                 chunks = await asyncio.to_thread(self.reranker.rerank, query, chunks, top_k=top_k)
 
-            context = "\n\n---\n\n".join(
-                [f"Document: {c['source']}\n{c['text']}" for c in chunks]
-            )
-            messages = self.generator.prompt.format_messages(context=context, question=query)
+            messages = self.generator.build_messages(query, chunks, history)
 
             async for chunk in self.generator.llm.astream(messages):
                 if chunk.content:
@@ -80,7 +81,8 @@ class RAGService:
             yield ("error", "An internal error occurred")
 
     async def ask_graph_stream(
-        self, query: str, use_rerank: bool = False, graph=None
+        self, query: str, use_rerank: bool = False, graph=None,
+        history: Optional[List[Dict]] = None,
     ) -> AsyncGenerator[Tuple[str, Any], None]:
         if graph is None:
             yield ("error", "RAG graph is not initialized")
@@ -95,6 +97,7 @@ class RAGService:
                 "metadata": {},
                 "is_safe": True,
                 "error": "",
+                "history": history or [],
             }
 
             final_state = await graph.ainvoke(initial_state)
@@ -136,7 +139,10 @@ class RAGService:
             logger.error("ask_graph_stream failed for query=%s: %s", query[:80], e, exc_info=True)
             yield ("error", "An internal error occurred")
 
-    def ask_graph(self, query: str, use_rerank: bool = False, graph=None) -> dict:
+    def ask_graph(
+        self, query: str, use_rerank: bool = False, graph=None,
+        history: Optional[List[Dict]] = None,
+    ) -> dict:
         if graph is None:
             raise ValueError("RAG graph is not initialized")
         logger.info(f"[Graph] Processing query: {query[:50]}...")
@@ -149,6 +155,7 @@ class RAGService:
             "metadata": {},
             "is_safe": True,
             "error": "",
+            "history": history or [],
         })
 
         citations = [

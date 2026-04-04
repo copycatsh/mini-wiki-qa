@@ -63,10 +63,13 @@ Optional services (start with `docker compose --profile <name> up`):
 ## Data Ingestion
 
 ```bash
-# Download SQuAD dataset
+# Download MS MARCO dataset (default)
+python scripts/download_msmarco.py
+
+# Or download SQuAD dataset
 python scripts/download_squad.py
 
-# Ingest documents (requires Qdrant running)
+# Ingest documents (requires Qdrant running, defaults to data/documents/msmarco/)
 python scripts/ingest.py
 
 # Or via API
@@ -91,7 +94,3 @@ make test           # health check all services
 - [ADR-004: SSE Streaming](docs/decisions/004-sse-streaming.md)
 - [Frontend](frontend/README.md) — Next.js chat UI, SSE streaming hook, components
 - [Design System](DESIGN.md) — typography, colors, spacing, components
-
-## License
-
-MIT
