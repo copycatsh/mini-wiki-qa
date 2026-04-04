@@ -63,7 +63,9 @@ app.add_middleware(
 from api.routers.health import router as health_router
 from api.routers.ask import router as ask_router
 from api.routers.admin import router as admin_router
+from api.routers.stream import router as stream_router
 
 app.include_router(health_router)
 app.include_router(ask_router)
 app.include_router(admin_router)
+app.include_router(stream_router)

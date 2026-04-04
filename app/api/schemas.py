@@ -33,3 +33,30 @@ class IngestResponse(BaseModel):
     status: str = Field(..., description="Ingestion result status")
     documents_loaded: int = Field(..., description="Number of documents processed")
     chunks_created: int = Field(..., description="Number of chunks created")
+
+
+class StreamEvent(BaseModel):
+    """SSE event sent during streaming"""
+    event: str = Field(..., description="Event type: token, citations, metadata, error, done")
+    data: str = Field(..., description="Event payload")
+
+
+class StreamTokenData(BaseModel):
+    """Payload for 'token' events"""
+    token: str
+
+
+class StreamCitationsData(BaseModel):
+    """Payload for 'citations' event, sent after stream completes"""
+    citations: List[Citation]
+
+
+class StreamMetadataData(BaseModel):
+    """Payload for 'metadata' event, sent after stream completes"""
+    metadata: dict
+
+
+class StreamErrorData(BaseModel):
+    """Payload for 'error' events"""
+    message: str
+    code: str = "internal_error"

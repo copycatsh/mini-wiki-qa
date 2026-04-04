@@ -57,9 +57,28 @@ services:
       start_period: 30s
       test: [ "CMD-SHELL", "curl -f http://localhost:8000/health || exit 1" ]
 
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_API_KEY: ${API_SHARED_SECRET:-change-me-in-production}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:cached
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      api:
+        condition: service_healthy
+
   # Qdrant Vector Database
   qdrant:
-    image: qdrant/qdrant:v1.8.4
+    image: qdrant/qdrant:v1.10.0
     ports:
       - "6333:6333"
       - "6334:6334"
