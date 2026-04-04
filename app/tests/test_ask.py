@@ -107,6 +107,27 @@ def test_ask_graph_with_history(client, mock_rag_graph):
     assert len(call_args["history"]) == 2
 
 
+def test_ask_with_multi_query(client, mock_retriever, mock_generator):
+    resp = client.post(
+        "/ask",
+        json={"query": "What is Python?", "use_multi_query": True},
+        headers={"X-API-Key": VALID_API_KEY},
+    )
+    assert resp.status_code == 200
+    assert "answer" in resp.json()
+
+
+def test_ask_graph_with_multi_query(client, mock_rag_graph):
+    resp = client.post(
+        "/ask-graph",
+        json={"query": "What is Python?", "use_multi_query": True},
+        headers={"X-API-Key": VALID_API_KEY},
+    )
+    assert resp.status_code == 200
+    call_args = mock_rag_graph.invoke.call_args[0][0]
+    assert call_args["use_multi_query"] is True
+
+
 def test_ask_blocks_injection_in_history(client, mock_injection_guard):
     mock_injection_guard.check.side_effect = [
         {"is_safe": True, "detected_patterns": [], "risk_level": "none"},

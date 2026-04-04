@@ -22,4 +22,12 @@
 **Pros:** Guarantees history never overflows context window. Adapts automatically to different model context sizes.
 **Cons:** Requires adding a tokenizer dependency (tiktoken or model-specific). Adds complexity to message construction path.
 **Context:** Identified by outside voice during eng review (2026-04-04). The 5-pair limit is a reasonable heuristic for development. This becomes important when supporting models with different context window sizes or when conversations have very long messages.
-**Depends on:** Conversational memory (feature/conversational-memory) — in progress.
+**Depends on:** Conversational memory (feature/conversational-memory) — completed 2026-04-04.
+
+## Query expansion result caching (LRU)
+**What:** Cache LLM-generated query variants for identical input queries using functools.lru_cache or a simple dict with bounded size.
+**Why:** If a user asks the same question again (common in chat UIs with retry), we skip the ~500ms LLM call for variant generation. The variants for a given query are deterministic-ish (temperature=0).
+**Pros:** Eliminates redundant LLM calls. Simple to implement (~5 lines with lru_cache).
+**Cons:** Memory grows without eviction unless bounded. Cache becomes stale if LLM behavior changes (model update).
+**Context:** Identified during eng review of multi-query expansion (2026-04-04). Low priority since multi-query is opt-in and the latency is acceptable for the current use case.
+**Depends on:** Multi-query expansion (feature/multi-query-expansion).

@@ -13,6 +13,7 @@ class AskRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500, description="User question")
     top_k: Optional[int] = Field(default=5, ge=1, le=20, description="Number of chunks to retrieve")
     use_rerank: Optional[bool] = Field(default=False, description="Enable reranking")
+    use_multi_query: Optional[bool] = Field(default=False, description="Enable multi-query expansion")
     history: List[HistoryMessage] = Field(default=[], max_length=20, description="Conversation history")
 
 

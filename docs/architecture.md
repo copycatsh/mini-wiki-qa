@@ -35,7 +35,7 @@ Two pipelines serve the same purpose with different safety guarantees.
   InjectionGuard (query + history) ── blocked ──► 400 Error
     │ safe
     ▼
-  Retrieve → Rerank (optional) → Generate (with history) → Response
+  Retrieve (or Multi-Query Retrieve) → Rerank (optional) → Generate (with history) → Response
 ```
 
 **`/ask/stream`** (SSE streaming, with injection guard):
@@ -59,7 +59,7 @@ Two pipelines serve the same purpose with different safety guarantees.
   Citations + Metadata + Done
 ```
 
-All endpoints accept an optional `history` field (list of prior user/assistant messages) for conversational context. History is validated by Pydantic (`HistoryMessage` model) and checked by the injection guard before reaching the LLM.
+All endpoints accept optional fields: `history` (list of prior user/assistant messages) for conversational context, and `use_multi_query` (bool, default false) for multi-query expansion. When multi-query is enabled, the retriever generates alternative query phrasings via LLM, retrieves chunks for each variant in parallel, deduplicates by content, and keeps the highest-scoring results. History is validated by Pydantic (`HistoryMessage` model) and checked by the injection guard before reaching the LLM.
 
 ### Graph Pipeline (`/ask-graph`, `/ask-graph/stream`)
 
@@ -74,7 +74,7 @@ All endpoints accept an optional `history` field (list of prior user/assistant m
            ▼
   ┌─────────────────┐
   │    retrieve      │  top_k=20 if rerank, else 5
-  └────────┬────────┘
+  └────────┬────────┘  (or multi-query: expand → parallel retrieve → dedup)
            ▼
   ┌─────────────────┐
   │     rerank       │  always visited; skips internally when use_rerank=False
@@ -189,7 +189,7 @@ app/
 ├── services/
 │   └── rag_service.py      # Orchestrates retriever + generator + reranker
 ├── rag/
-│   ├── retrieval.py        # Qdrant semantic search
+│   ├── retrieval.py        # Qdrant semantic search, multi-query expansion utilities
 │   ├── generation.py       # LLM answer generation
 │   ├── reranker.py         # Cross-encoder reranking
 │   ├── ingest.py           # Document ingestion pipeline

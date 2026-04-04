@@ -1,6 +1,6 @@
 """Tests for LangGraph RAG pipeline — conditional edge routing"""
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from rag.graph import create_rag_graph
 
 
@@ -44,6 +44,7 @@ def _base_state(**overrides):
         "chunks": [],
         "answer": "",
         "use_rerank": False,
+        "use_multi_query": False,
         "metadata": {},
         "is_safe": True,
         "error": "",
@@ -100,6 +101,52 @@ class TestGraphUnsafeQuery:
         assert "blocked for security reasons" in result["answer"]
         assert result["error"] != ""
         assert result["metadata"]["injection_check"]["is_safe"] is False
+
+
+class TestGraphMultiQuery:
+    def test_graph_with_multi_query(self, mock_deps):
+        mock_deps["injection_guard"].check.return_value = {
+            "is_safe": True,
+            "detected_patterns": [],
+            "risk_level": "none",
+        }
+        mock_deps["retriever"].retrieve.return_value = [
+            {"text": "Python is great", "source": "python.md", "score": 0.9}
+        ]
+        mock_deps["generator"].llm.invoke.return_value = MagicMock(
+            content="What are Python's features?\nHow is Python used?"
+        )
+
+        graph = _make_graph(mock_deps)
+        result = graph.invoke(_base_state(use_multi_query=True))
+
+        assert result["is_safe"] is True
+        assert result["answer"] == "Python is a programming language."
+        assert result["metadata"].get("multi_query") is True
+        assert mock_deps["retriever"].retrieve.call_count == 3
+
+    def test_graph_multi_query_with_rerank(self, mock_deps):
+        mock_deps["injection_guard"].check.return_value = {
+            "is_safe": True,
+            "detected_patterns": [],
+            "risk_level": "none",
+        }
+        mock_deps["retriever"].retrieve.return_value = [
+            {"text": "Python is great", "source": "python.md", "score": 0.9}
+        ]
+        mock_deps["reranker"].rerank.return_value = [
+            {"text": "Python is great", "source": "python.md", "score": 0.9, "rerank_score": 0.99}
+        ]
+        mock_deps["generator"].llm.invoke.return_value = MagicMock(
+            content="What are Python's features?\nHow is Python used?"
+        )
+
+        graph = _make_graph(mock_deps)
+        result = graph.invoke(_base_state(use_multi_query=True, use_rerank=True))
+
+        assert result["is_safe"] is True
+        assert result["metadata"].get("multi_query") is True
+        assert result["metadata"].get("reranked") is True
 
 
 class TestGraphHistory:
