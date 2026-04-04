@@ -71,7 +71,9 @@ class RAGEvaluator:
             self,
             retriever,
             top_k: int = 5,
-            sample_size: int = None
+            sample_size: int = None,
+            use_rerank: bool = False,
+            reranker=None
     ) -> Dict:
         """
         Evaluate retrieval performance
@@ -80,6 +82,8 @@ class RAGEvaluator:
             retriever: DocumentRetriever instance
             top_k: Number of documents to retrieve
             sample_size: Number of samples to evaluate (None = all)
+            use_rerank: Whether to apply reranking
+            reranker: Reranker instance (required if use_rerank=True)
 
         Returns:
             Dict with metrics
@@ -88,7 +92,18 @@ class RAGEvaluator:
 
         # Sample golden set if needed
         samples = self.golden_set[:sample_size] if sample_size else self.golden_set
-        logger.info(f"Evaluating on {len(samples)} samples with top_k={top_k}")
+        logger.info(f"Evaluating on {len(samples)} samples with top_k={top_k}, rerank={use_rerank}")
+
+        if not samples:
+            return {
+                "recall@3": 0.0,
+                "recall@5": 0.0,
+                "mrr": 0.0,
+                "avg_latency_ms": 0.0,
+                "total_samples": 0,
+                "top_k": top_k,
+                "use_rerank": use_rerank,
+            }
 
         # Metrics
         recall_at_3 = []
@@ -102,7 +117,14 @@ class RAGEvaluator:
 
             # Retrieve
             start_time = time.time()
-            chunks = retriever.retrieve(query, top_k=top_k)
+            if use_rerank:
+                chunks = retriever.retrieve(query=query, top_k=20)
+            else:
+                chunks = retriever.retrieve(query=query, top_k=top_k)
+
+            if use_rerank and reranker:
+                chunks = reranker.rerank(query, chunks, top_k=top_k)
+
             latency = time.time() - start_time
 
             # Extract document names
@@ -127,7 +149,8 @@ class RAGEvaluator:
             "mrr": sum(mrr_scores) / len(mrr_scores),
             "avg_latency_ms": sum(latencies) / len(latencies) * 1000,
             "total_samples": len(samples),
-            "top_k": top_k
+            "top_k": top_k,
+            "use_rerank": use_rerank,
         }
 
         logger.info(f"Evaluation complete: {results}")
