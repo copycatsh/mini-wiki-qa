@@ -56,10 +56,6 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
 
     def retrieve_node(state: RAGState) -> RAGState:
         """Retrieve relevant chunks"""
-        if not state.get("is_safe", True):
-            logger.info("Retrieve node: skipped (query blocked)")
-            return state
-
         logger.info(f"Retrieve node: query={state['query'][:50]}...")
 
         top_k = 20 if state.get("use_rerank", False) else 5
@@ -76,10 +72,6 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
 
     def rerank_node(state: RAGState) -> RAGState:
         """Rerank chunks (conditional)"""
-        if not state.get("is_safe", True):
-            logger.info("Rerank node: skipped (query blocked)")
-            return state
-
         if not state.get("use_rerank", False):
             logger.info("Rerank node: skipping (use_rerank=False)")
             return state
@@ -99,10 +91,6 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
 
     def generate_node(state: RAGState) -> RAGState:
         """Generate answer from chunks"""
-        if not state.get("is_safe", True):
-            logger.info("Generate node: skipped (query blocked)")
-            return state
-
         logger.info("Generate node: generating answer...")
 
         answer = generator.generate(state["query"], state["chunks"])
@@ -148,7 +136,14 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
 
     # Add edges (safety first!)
     workflow.set_entry_point("injection_guard")
-    workflow.add_edge("injection_guard", "retrieve")
+    def route_after_guard(state: RAGState) -> str:
+        return "retrieve" if state["is_safe"] else END
+
+    workflow.add_conditional_edges(
+        "injection_guard",
+        route_after_guard,
+        {"retrieve": "retrieve", END: END},
+    )
     workflow.add_edge("retrieve", "rerank")
     workflow.add_edge("rerank", "generate")
     workflow.add_edge("generate", "pii_scrubber")
