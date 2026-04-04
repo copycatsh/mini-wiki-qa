@@ -30,7 +30,7 @@ class AnswerGenerator:
         # Initialize LLM (OpenAI-compatible)
         self.llm = ChatOpenAI(
             base_url=base_url,
-            api_key=settings.OPENAI_API_KEY or "dummy",
+            api_key=settings.OPENAI_API_KEY or "not-needed",
             model=model,
             temperature=0.0,
             max_tokens=500
@@ -83,14 +83,3 @@ Answer:""")
 
         logger.info(f"Generated answer: {answer[:100]}...")
         return answer
-
-
-# Global generator instance
-_generator = None
-
-def get_generator() -> AnswerGenerator:
-    """Get or create global generator instance"""
-    global _generator
-    if _generator is None:
-        _generator = AnswerGenerator()
-    return _generator

@@ -1,5 +1,6 @@
 """Application configuration from environment variables"""
 from pydantic_settings import BaseSettings
+from pydantic import model_validator
 from typing import Literal
 
 
@@ -44,6 +45,15 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+    @model_validator(mode='after')
+    def validate_openai_key(self):
+        if self.LLM_BACKEND == "openai" and not self.OPENAI_API_KEY:
+            raise ValueError(
+                "OPENAI_API_KEY must be set when LLM_BACKEND is 'openai'. "
+                "Set it in your .env file or environment variables."
+            )
+        return self
 
 
 # Global settings instance
