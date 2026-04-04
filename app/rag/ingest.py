@@ -3,8 +3,8 @@ import logging
 from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Qdrant
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from pathlib import Path
@@ -110,12 +110,11 @@ class DocumentIngester:
         self.create_collection()
 
         # Index documents
-        Qdrant.from_documents(
+        QdrantVectorStore.from_documents(
             chunks,
             self.embeddings,
             url=settings.QDRANT_URL,
             collection_name=settings.QDRANT_COLLECTION,
-            force_recreate=False
         )
 
         logger.info("✅ Indexing complete!")

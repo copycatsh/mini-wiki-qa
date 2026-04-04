@@ -1,7 +1,7 @@
 """Answer generation using LLM"""
 import logging
 from typing import List, Dict
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 
 from core.config import settings
@@ -29,9 +29,9 @@ class AnswerGenerator:
 
         # Initialize LLM (OpenAI-compatible)
         self.llm = ChatOpenAI(
-            openai_api_base=base_url,
-            openai_api_key=settings.OPENAI_API_KEY or "dummy",
-            model_name=model,
+            base_url=base_url,
+            api_key=settings.OPENAI_API_KEY or "dummy",
+            model=model,
             temperature=0.0,
             max_tokens=500
         )

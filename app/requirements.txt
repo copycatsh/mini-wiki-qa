@@ -1,25 +1,28 @@
 # FastAPI
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+pydantic==2.11.1
+pydantic-settings==2.9.1
 
 # LangChain
-langchain==0.1.6
-langchain-community==0.0.20
-langchain-core==0.1.23
+langchain==0.3.25
+langchain-community==0.3.24
+langchain-core==0.3.59
+langchain-openai==0.2.14
+langchain-huggingface==0.1.2
+langchain-qdrant==0.2.0
 
-# LangGraph (for Week 3+)
-langgraph==0.0.20
+# LangGraph
+langgraph==0.3.30
 
 # Vector DB
 qdrant-client==1.11.3
 
 # Embeddings
-sentence-transformers==2.3.1
+sentence-transformers==2.7.0
 
 # LLM clients
-openai==1.10.0  # For OpenAI-compatible APIs (LM Studio, Ollama)
+openai==1.82.0  # For OpenAI-compatible APIs (LM Studio, Ollama)
 
 # MLflow
 mlflow==2.10.2

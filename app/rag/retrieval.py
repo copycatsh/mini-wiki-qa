@@ -1,8 +1,8 @@
 """Document retrieval from Qdrant vector store"""
 import logging
 from typing import List, Dict
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Qdrant
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 
 from core.config import settings
@@ -27,10 +27,10 @@ class DocumentRetriever:
         self.client = QdrantClient(url=settings.QDRANT_URL)
 
         # Initialize vector store
-        self.vectorstore = Qdrant(
+        self.vectorstore = QdrantVectorStore(
             client=self.client,
             collection_name=settings.QDRANT_COLLECTION,
-            embeddings=self.embeddings
+            embedding=self.embeddings
         )
 
     def retrieve(self, query: str, top_k: int = 5) -> List[Dict]:
