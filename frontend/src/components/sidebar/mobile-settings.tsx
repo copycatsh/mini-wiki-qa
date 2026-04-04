@@ -56,9 +56,9 @@ export function MobileSettings({ pipeline, onPipelineChange, useRerank, onRerank
                 aria-checked={useRerank}
                 aria-label="Enable reranking"
                 onClick={() => onRerankChange(!useRerank)}
-                className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useRerank ? "bg-accent" : "bg-border"}`}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${useRerank ? "bg-accent" : "bg-border"}`}
               >
-                <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useRerank ? "translate-x-[18px]" : ""}`} />
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${useRerank ? "translate-x-5" : ""}`} />
               </button>
             </div>
             <div className="flex items-center justify-between py-2">
@@ -68,9 +68,9 @@ export function MobileSettings({ pipeline, onPipelineChange, useRerank, onRerank
                 aria-checked={useMultiQuery}
                 aria-label="Enable multi-query expansion"
                 onClick={() => onMultiQueryChange(!useMultiQuery)}
-                className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useMultiQuery ? "bg-accent" : "bg-border"}`}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${useMultiQuery ? "bg-accent" : "bg-border"}`}
               >
-                <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useMultiQuery ? "translate-x-[18px]" : ""}`} />
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${useMultiQuery ? "translate-x-5" : ""}`} />
               </button>
             </div>
           </div>

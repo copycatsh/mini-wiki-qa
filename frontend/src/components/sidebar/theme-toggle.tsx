@@ -17,8 +17,9 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="font-sans text-xs text-text-muted hover:text-accent transition-colors"
+      className="flex items-center gap-1.5 font-sans text-[13px] text-text-muted hover:text-accent transition-colors py-1"
     >
+      <span className="text-sm">{isDark ? "\u2600" : "\u263E"}</span>
       {isDark ? "Light mode" : "Dark mode"}
     </button>
   );
