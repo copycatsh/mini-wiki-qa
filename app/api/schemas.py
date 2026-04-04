@@ -1,13 +1,19 @@
 """Pydantic request/response schemas for the Mini-Wiki Q&A API."""
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Literal, Optional
+
+
+class HistoryMessage(BaseModel):
+    role: Literal["user", "assistant"] = Field(..., description="Message sender role")
+    content: str = Field(..., min_length=1, max_length=2000, description="Message content")
 
 
 class AskRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500, description="User question")
     top_k: Optional[int] = Field(default=5, ge=1, le=20, description="Number of chunks to retrieve")
     use_rerank: Optional[bool] = Field(default=False, description="Enable reranking")
+    history: List[HistoryMessage] = Field(default=[], max_length=20, description="Conversation history")
 
 
 class Citation(BaseModel):

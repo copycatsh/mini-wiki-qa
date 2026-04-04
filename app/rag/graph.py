@@ -15,6 +15,7 @@ class RAGState(TypedDict):
     metadata: Dict
     is_safe: bool
     error: str
+    history: List[Dict]
 
 
 def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_guard) -> StateGraph:
@@ -33,10 +34,17 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
     """
 
     def injection_guard_node(state: RAGState) -> RAGState:
-        """Check query for injection attempts"""
-        logger.info("Injection Guard node: checking query...")
+        """Check query and history for injection attempts"""
+        logger.info("Injection Guard node: checking query and history...")
 
         result = injection_guard.check(state["query"])
+
+        if result["is_safe"]:
+            for msg in state.get("history", []):
+                hist_result = injection_guard.check(msg["content"])
+                if not hist_result["is_safe"]:
+                    result = hist_result
+                    break
 
         state["is_safe"] = result["is_safe"]
         state["metadata"] = {
@@ -93,7 +101,7 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
         """Generate answer from chunks"""
         logger.info("Generate node: generating answer...")
 
-        answer = generator.generate(state["query"], state["chunks"])
+        answer = generator.generate(state["query"], state["chunks"], history=state.get("history"))
 
         state["answer"] = answer
         logger.info(f"Generated answer: {answer[:100]}...")

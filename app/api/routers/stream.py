@@ -9,10 +9,13 @@ from api.dependencies import (
     verify_api_key, get_retriever, get_generator, get_reranker, get_rag_graph,
     get_injection_guard,
 )
+from api.utils import serialize_history, check_history_injection
 from services.rag_service import RAGService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+_SSE_HEADERS = {"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"}
 
 
 async def sse_generator(stream):
@@ -40,21 +43,24 @@ async def ask_stream(
     injection_guard=Depends(get_injection_guard),
 ):
     guard_result = injection_guard.check(request.query)
-    if not guard_result["is_safe"]:
+    history_blocked = check_history_injection(request.history, injection_guard)
+
+    if not guard_result["is_safe"] or history_blocked:
         async def blocked_stream():
             yield ("error", "Query blocked by safety filter")
         return StreamingResponse(
             sse_generator(blocked_stream()),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+            headers=_SSE_HEADERS,
         )
 
+    history = serialize_history(request.history)
     service = RAGService(retriever, generator, reranker)
-    stream = service.ask_stream(request.query, top_k=request.top_k, use_rerank=request.use_rerank)
+    stream = service.ask_stream(request.query, top_k=request.top_k, use_rerank=request.use_rerank, history=history)
     return StreamingResponse(
         sse_generator(stream),
         media_type="text/event-stream",
-        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+        headers=_SSE_HEADERS,
     )
 
 
@@ -67,10 +73,11 @@ async def ask_graph_stream(
     reranker=Depends(get_reranker),
     graph=Depends(get_rag_graph),
 ):
+    history = serialize_history(request.history)
     service = RAGService(retriever, generator, reranker)
-    stream = service.ask_graph_stream(request.query, use_rerank=request.use_rerank, graph=graph)
+    stream = service.ask_graph_stream(request.query, use_rerank=request.use_rerank, graph=graph, history=history)
     return StreamingResponse(
         sse_generator(stream),
         media_type="text/event-stream",
-        headers={"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"},
+        headers=_SSE_HEADERS,
     )

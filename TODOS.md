@@ -15,3 +15,11 @@
 **Cons:** Need to track task state somewhere (in-memory dict is simplest, Redis for persistence). Adds complexity to admin router.
 **Context:** Identified by outside voice during eng review (2026-04-04). For the current small SQuAD dataset, sync is fine. This becomes a problem when ingesting larger document collections.
 **Depends on:** /ingest wired to run_ingestion() — completed 2026-04-04 (feature/refactor-di-service-layer).
+
+## Dynamic token budget for conversation history
+**What:** Count tokens for system prompt + conversation history + retrieved chunks, dynamically truncate history to fit model's context window.
+**Why:** Currently using a fixed MAX_HISTORY_PAIRS=5 heuristic. This works for phi-3-mini 4k but could overflow with verbose conversations where individual messages are long.
+**Pros:** Guarantees history never overflows context window. Adapts automatically to different model context sizes.
+**Cons:** Requires adding a tokenizer dependency (tiktoken or model-specific). Adds complexity to message construction path.
+**Context:** Identified by outside voice during eng review (2026-04-04). The 5-pair limit is a reasonable heuristic for development. This becomes important when supporting models with different context window sizes or when conversations have very long messages.
+**Depends on:** Conversational memory (feature/conversational-memory) — in progress.

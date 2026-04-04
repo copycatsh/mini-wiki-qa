@@ -11,7 +11,7 @@ LangChain's sequential chain model doesn't support conditional branching without
 
 ## Decision
 
-Use LangGraph `StateGraph` for the full pipeline (`/ask-graph`). Keep the basic LangChain pipeline (`/ask`) for simple queries that don't need safety layers.
+Use LangGraph `StateGraph` for the full pipeline (`/ask-graph`) with built-in safety nodes. The basic pipeline (`/ask`, `/ask/stream`) uses router-level injection guards instead of graph nodes, providing the same protection with less overhead.
 
 Key design choices:
 
@@ -27,7 +27,7 @@ Key design choices:
 - Safety routing is declarative and visible in the graph structure
 - Each node is independently testable
 - New nodes (e.g., query expansion) can be added without touching existing nodes
-- Graph visualization available via `scripts/visualize_graph.py`
+- Graph structure is visible in the ASCII diagrams in `docs/architecture.md`
 
 **Trade-off:**
 - The graph pipeline (`/ask-graph`) and basic pipeline (`/ask`) duplicate retrieval/generation logic. `RAGService` handles the basic path, graph nodes handle the graph path. Acceptable at current scale.

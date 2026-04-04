@@ -1,12 +1,21 @@
 """Answer generation using LLM"""
 import logging
-from typing import List, Dict
+from typing import List, Dict, Optional
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, BaseMessage
 
 from core.config import settings
 
 logger = logging.getLogger(__name__)
+
+SYSTEM_PROMPT = """You are a helpful assistant that answers questions based on provided context.
+
+Rules:
+- Answer ONLY based on the provided context
+- If the context doesn't contain the answer, say "I don't have enough information to answer this question"
+- Be concise and direct
+- Cite the document sources when relevant"""
 
 
 class AnswerGenerator:
@@ -27,7 +36,6 @@ class AnswerGenerator:
             base_url = "https://api.openai.com/v1"
             model = "gpt-4"
 
-        # Initialize LLM (OpenAI-compatible)
         self.llm = ChatOpenAI(
             base_url=base_url,
             api_key=settings.OPENAI_API_KEY or "not-needed",
@@ -36,48 +44,36 @@ class AnswerGenerator:
             max_tokens=500
         )
 
-        # Create prompt template
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a helpful assistant that answers questions based on provided context.
+    def build_messages(
+        self, query: str, chunks: List[Dict], history: Optional[List[Dict]] = None
+    ) -> List[BaseMessage]:
+        """Build LLM message list with optional conversation history.
 
-Rules:
-- Answer ONLY based on the provided context
-- If the context doesn't contain the answer, say "I don't have enough information to answer this question"
-- Be concise and direct
-- Cite the document sources when relevant"""),
-            ("user", """Context:
-{context}
-
-Question: {question}
-
-Answer:""")
-        ])
-
-    def generate(self, query: str, chunks: List[Dict]) -> str:
+        Returns [SystemMessage, *history_messages, HumanMessage(context + question)].
+        History is truncated to the last MAX_HISTORY_PAIRS pairs.
         """
-        Generate answer from query and retrieved chunks
+        messages: List[BaseMessage] = [SystemMessage(content=SYSTEM_PROMPT)]
 
-        Args:
-            query: User question
-            chunks: Retrieved chunks with text and metadata
+        if history:
+            max_messages = settings.MAX_HISTORY_PAIRS * 2
+            trimmed = history[-max_messages:]
+            for msg in trimmed:
+                if msg["role"] == "user":
+                    messages.append(HumanMessage(content=msg["content"]))
+                else:
+                    messages.append(AIMessage(content=msg["content"]))
 
-        Returns:
-            Generated answer
-        """
+        context = "\n\n---\n\n".join(
+            f"Document: {chunk['source']}\n{chunk['text']}" for chunk in chunks
+        )
+        messages.append(HumanMessage(content=f"Context:\n{context}\n\nQuestion: {query}\n\nAnswer:"))
+        return messages
+
+    def generate(self, query: str, chunks: List[Dict], history: Optional[List[Dict]] = None) -> str:
+        """Generate answer from query, retrieved chunks, and optional history."""
         logger.info(f"Generating answer for query: {query[:50]}...")
 
-        # Format context from chunks
-        context = "\n\n---\n\n".join([
-            f"Document: {chunk['source']}\n{chunk['text']}"
-            for chunk in chunks
-        ])
-
-        # Generate answer
-        messages = self.prompt.format_messages(
-            context=context,
-            question=query
-        )
-
+        messages = self.build_messages(query, chunks, history)
         response = self.llm.invoke(messages)
         answer = response.content
 

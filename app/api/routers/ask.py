@@ -2,7 +2,11 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from api.schemas import AskRequest, AskResponse, Citation
-from api.dependencies import verify_api_key, get_retriever, get_generator, get_reranker, get_rag_graph
+from api.dependencies import (
+    verify_api_key, get_retriever, get_generator, get_reranker, get_rag_graph,
+    get_injection_guard,
+)
+from api.utils import serialize_history, check_history_injection
 from core.config import settings
 from services.rag_service import RAGService
 
@@ -17,10 +21,16 @@ def ask_question(
     retriever=Depends(get_retriever),
     generator=Depends(get_generator),
     reranker=Depends(get_reranker),
+    injection_guard=Depends(get_injection_guard),
 ):
+    guard_result = injection_guard.check(request.query)
+    if not guard_result["is_safe"] or check_history_injection(request.history, injection_guard):
+        raise HTTPException(status_code=400, detail="Query blocked by safety filter")
+
     try:
+        history = serialize_history(request.history)
         service = RAGService(retriever, generator, reranker)
-        result = service.ask(request.query, top_k=request.top_k, use_rerank=request.use_rerank)
+        result = service.ask(request.query, top_k=request.top_k, use_rerank=request.use_rerank, history=history)
         citations = [Citation(**c) for c in result["citations"]]
         return AskResponse(
             answer=result["answer"],
@@ -50,8 +60,9 @@ def ask_question_graph(
     reranker=Depends(get_reranker),
 ):
     try:
+        history = serialize_history(request.history)
         service = RAGService(retriever, generator, reranker)
-        result = service.ask_graph(request.query, use_rerank=request.use_rerank, graph=graph)
+        result = service.ask_graph(request.query, use_rerank=request.use_rerank, graph=graph, history=history)
         citations = [Citation(**c) for c in result["citations"]]
         return AskResponse(
             answer=result["answer"],

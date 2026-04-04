@@ -1,0 +1,20 @@
+# Local dev overrides (gitignored, safe to customize)
+# Copy from compose.override.example.yml and adjust to your setup.
+#
+# Examples:
+#   - Expose extra debug ports
+#   - Mount local model cache to avoid re-downloading
+#   - Override resource limits
+#   - Add environment variables for debugging
+
+services:
+  api:
+    environment:
+      LOG_LEVEL: DEBUG
+    # Uncomment to mount HuggingFace cache (avoids re-downloading models)
+    # volumes:
+    #   - ~/.cache/huggingface:/root/.cache/huggingface:cached
+
+  # frontend:
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: http://localhost:8000

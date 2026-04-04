@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 500
     CHUNK_OVERLAP: int = 50
     TOP_K: int = 5
+    MAX_HISTORY_PAIRS: int = 5
 
     class Config:
         env_file = ".env"

@@ -144,7 +144,7 @@ def run_ingestion(embeddings, qdrant_url: str, collection_name: str, docs_dir: s
     """
     if docs_dir is None:
         project_root = Path(__file__).parent.parent.parent
-        docs_dir = str(project_root / "data" / "documents" / "squad")
+        docs_dir = str(project_root / "data" / "documents" / "msmarco")
 
     qdrant_client = QdrantClient(url=qdrant_url)
     ingester = DocumentIngester(embeddings, qdrant_client, qdrant_url, collection_name)
