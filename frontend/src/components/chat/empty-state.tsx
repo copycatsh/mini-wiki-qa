@@ -21,7 +21,7 @@ export function EmptyState({ onSuggestionClick }: EmptyStateProps) {
   });
 
   return (
-    <div className="flex-1 flex items-center justify-center px-8">
+    <div className="flex-1 flex items-center justify-center px-8 pb-16">
       <div className="text-center max-w-md">
         <h1 className="font-serif text-[32px] text-text leading-tight">
           Ask your documents anything
@@ -31,7 +31,7 @@ export function EmptyState({ onSuggestionClick }: EmptyStateProps) {
             <button
               key={suggestion}
               onClick={() => onSuggestionClick(suggestion)}
-              className="px-3 py-1.5 text-xs font-sans border border-border rounded-sm text-text-muted hover:border-accent hover:text-accent transition-colors duration-150"
+              className="px-4 py-2.5 text-[13px] font-sans border border-border rounded-sm text-text-muted hover:border-accent hover:text-accent transition-colors duration-150"
             >
               {suggestion}
             </button>
@@ -39,7 +39,7 @@ export function EmptyState({ onSuggestionClick }: EmptyStateProps) {
         </div>
         {health && (
           <p className="mt-4 text-[11px] font-mono text-text-muted">
-            {health.status === "healthy" ? "Backend connected" : "Backend degraded"}
+            {health.status === "healthy" ? "Ready" : "Service unavailable"}
           </p>
         )}
       </div>

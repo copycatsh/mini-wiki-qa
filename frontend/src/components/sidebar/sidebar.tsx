@@ -14,7 +14,7 @@ interface SidebarProps {
 export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange, useMultiQuery, onMultiQueryChange }: SidebarProps) {
   return (
     <aside className="w-sidebar min-w-[240px] bg-sidebar border-r border-border px-4 py-5 flex flex-col gap-6 max-lg:hidden">
-      <h1 className="font-serif text-xl text-text">Mini Wiki Q&A</h1>
+      <p className="font-serif text-xl text-text">Mini Wiki Q&A</p>
 
       <div>
         <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-muted mb-2.5">Pipeline</div>
@@ -38,9 +38,9 @@ export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange,
             aria-checked={useRerank}
             aria-label="Enable reranking"
             onClick={() => onRerankChange(!useRerank)}
-            className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useRerank ? "bg-accent" : "bg-border"}`}
+            className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${useRerank ? "bg-accent" : "bg-border"}`}
           >
-            <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useRerank ? "translate-x-[18px]" : ""}`} />
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${useRerank ? "translate-x-5" : ""}`} />
           </button>
         </div>
         <div className="flex items-center justify-between py-1.5">
@@ -50,9 +50,9 @@ export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange,
             aria-checked={useMultiQuery}
             aria-label="Enable multi-query expansion"
             onClick={() => onMultiQueryChange(!useMultiQuery)}
-            className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${useMultiQuery ? "bg-accent" : "bg-border"}`}
+            className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${useMultiQuery ? "bg-accent" : "bg-border"}`}
           >
-            <span className={`absolute top-0.5 left-0.5 w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform duration-200 ${useMultiQuery ? "translate-x-[18px]" : ""}`} />
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${useMultiQuery ? "translate-x-5" : ""}`} />
           </button>
         </div>
       </div>
