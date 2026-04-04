@@ -30,7 +30,10 @@ def ask_question(
     try:
         history = serialize_history(request.history)
         service = RAGService(retriever, generator, reranker)
-        result = service.ask(request.query, top_k=request.top_k, use_rerank=request.use_rerank, history=history)
+        result = service.ask(
+            request.query, top_k=request.top_k, use_rerank=request.use_rerank,
+            use_multi_query=request.use_multi_query, history=history,
+        )
         citations = [Citation(**c) for c in result["citations"]]
         return AskResponse(
             answer=result["answer"],
@@ -39,6 +42,7 @@ def ask_question(
                 "query": request.query,
                 "top_k": request.top_k,
                 "use_rerank": request.use_rerank,
+                "use_multi_query": request.use_multi_query,
                 "llm_backend": settings.LLM_BACKEND,
                 "chunks_retrieved": result["chunks_retrieved"],
             }
@@ -62,7 +66,10 @@ def ask_question_graph(
     try:
         history = serialize_history(request.history)
         service = RAGService(retriever, generator, reranker)
-        result = service.ask_graph(request.query, use_rerank=request.use_rerank, graph=graph, history=history)
+        result = service.ask_graph(
+            request.query, use_rerank=request.use_rerank,
+            use_multi_query=request.use_multi_query, graph=graph, history=history,
+        )
         citations = [Citation(**c) for c in result["citations"]]
         return AskResponse(
             answer=result["answer"],
@@ -72,6 +79,7 @@ def ask_question_graph(
                 "query": request.query,
                 "top_k": request.top_k,
                 "use_rerank": request.use_rerank,
+                "use_multi_query": request.use_multi_query,
                 "llm_backend": settings.LLM_BACKEND,
                 "pipeline": "langgraph",
             }

@@ -1,6 +1,6 @@
 # Mini-Wiki Q&A
 
-RAG-powered question answering over local documents. Semantic search, reranking, LangGraph safety pipeline, SSE streaming, and a chat UI.
+RAG-powered question answering over local documents. Semantic search, reranking, multi-query expansion, LangGraph safety pipeline, SSE streaming, and a chat UI.
 
 ## Quick Start
 

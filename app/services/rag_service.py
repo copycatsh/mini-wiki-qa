@@ -3,6 +3,7 @@ import asyncio
 import logging
 from typing import List, Dict, Optional, AsyncGenerator, Tuple, Any
 from core.config import settings
+from rag.retrieval import multi_query_retrieve
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,14 @@ class RAGService:
 
     def ask(
         self, query: str, top_k: int = 5, use_rerank: bool = False,
-        history: Optional[List[Dict]] = None,
+        use_multi_query: bool = False, history: Optional[List[Dict]] = None,
     ) -> dict:
         logger.info(f"Processing query: {query[:50]}...")
-        chunks = self.retriever.retrieve(query, top_k=top_k)
+        retrieve_k = 20 if use_rerank else top_k
+        if use_multi_query:
+            chunks = multi_query_retrieve(self.generator.llm, self.retriever, query, top_k=retrieve_k)
+        else:
+            chunks = self.retriever.retrieve(query, top_k=retrieve_k)
 
         if use_rerank:
             logger.info("Applying reranking...")
@@ -44,10 +49,16 @@ class RAGService:
 
     async def ask_stream(
         self, query: str, top_k: int = 5, use_rerank: bool = False,
-        history: Optional[List[Dict]] = None,
+        use_multi_query: bool = False, history: Optional[List[Dict]] = None,
     ) -> AsyncGenerator[Tuple[str, Any], None]:
         try:
-            chunks = await asyncio.to_thread(self.retriever.retrieve, query, top_k=top_k)
+            retrieve_k = 20 if use_rerank else top_k
+            if use_multi_query:
+                chunks = await asyncio.to_thread(
+                    multi_query_retrieve, self.generator.llm, self.retriever, query, top_k=retrieve_k,
+                )
+            else:
+                chunks = await asyncio.to_thread(self.retriever.retrieve, query, top_k=retrieve_k)
             if use_rerank:
                 chunks = await asyncio.to_thread(self.reranker.rerank, query, chunks, top_k=top_k)
 
@@ -70,8 +81,8 @@ class RAGService:
             yield ("citations", citations)
             yield ("metadata", {
                 "query": query, "top_k": top_k, "use_rerank": use_rerank,
-                "chunks_retrieved": len(chunks), "pipeline": "basic",
-                "llm_backend": settings.LLM_BACKEND,
+                "use_multi_query": use_multi_query, "chunks_retrieved": len(chunks),
+                "pipeline": "basic", "llm_backend": settings.LLM_BACKEND,
             })
             yield ("done", "")
         except asyncio.CancelledError:
@@ -81,8 +92,8 @@ class RAGService:
             yield ("error", "An internal error occurred")
 
     async def ask_graph_stream(
-        self, query: str, use_rerank: bool = False, graph=None,
-        history: Optional[List[Dict]] = None,
+        self, query: str, use_rerank: bool = False, use_multi_query: bool = False,
+        graph=None, history: Optional[List[Dict]] = None,
     ) -> AsyncGenerator[Tuple[str, Any], None]:
         if graph is None:
             yield ("error", "RAG graph is not initialized")
@@ -94,6 +105,7 @@ class RAGService:
                 "chunks": [],
                 "answer": "",
                 "use_rerank": use_rerank,
+                "use_multi_query": use_multi_query,
                 "metadata": {},
                 "is_safe": True,
                 "error": "",
@@ -140,8 +152,8 @@ class RAGService:
             yield ("error", "An internal error occurred")
 
     def ask_graph(
-        self, query: str, use_rerank: bool = False, graph=None,
-        history: Optional[List[Dict]] = None,
+        self, query: str, use_rerank: bool = False, use_multi_query: bool = False,
+        graph=None, history: Optional[List[Dict]] = None,
     ) -> dict:
         if graph is None:
             raise ValueError("RAG graph is not initialized")
@@ -152,6 +164,7 @@ class RAGService:
             "chunks": [],
             "answer": "",
             "use_rerank": use_rerank,
+            "use_multi_query": use_multi_query,
             "metadata": {},
             "is_safe": True,
             "error": "",

@@ -11,6 +11,12 @@ def test_local_backend_no_key_ok(monkeypatch):
     assert s.LLM_BACKEND == "lm-studio"
 
 
+def test_ask_request_multi_query_defaults_false():
+    from api.schemas import AskRequest
+    req = AskRequest(query="test")
+    assert req.use_multi_query is False
+
+
 def test_openai_backend_requires_api_key(monkeypatch):
     monkeypatch.setenv("LLM_BACKEND", "openai")
     monkeypatch.setenv("OPENAI_API_KEY", "")

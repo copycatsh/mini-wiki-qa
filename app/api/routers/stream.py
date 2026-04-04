@@ -56,7 +56,10 @@ async def ask_stream(
 
     history = serialize_history(request.history)
     service = RAGService(retriever, generator, reranker)
-    stream = service.ask_stream(request.query, top_k=request.top_k, use_rerank=request.use_rerank, history=history)
+    stream = service.ask_stream(
+        request.query, top_k=request.top_k, use_rerank=request.use_rerank,
+        use_multi_query=request.use_multi_query, history=history,
+    )
     return StreamingResponse(
         sse_generator(stream),
         media_type="text/event-stream",
@@ -75,7 +78,10 @@ async def ask_graph_stream(
 ):
     history = serialize_history(request.history)
     service = RAGService(retriever, generator, reranker)
-    stream = service.ask_graph_stream(request.query, use_rerank=request.use_rerank, graph=graph, history=history)
+    stream = service.ask_graph_stream(
+        request.query, use_rerank=request.use_rerank,
+        use_multi_query=request.use_multi_query, graph=graph, history=history,
+    )
     return StreamingResponse(
         sse_generator(stream),
         media_type="text/event-stream",

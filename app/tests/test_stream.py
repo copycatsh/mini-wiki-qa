@@ -202,6 +202,22 @@ async def test_ask_stream_blocks_injection_in_history(override_deps):
 
 
 @pytest.mark.asyncio
+async def test_ask_stream_with_multi_query(override_deps):
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.post(
+            "/ask/stream",
+            json={"query": "What is Python?", "use_multi_query": True},
+            headers={"X-API-Key": VALID_API_KEY},
+        )
+
+    assert resp.status_code == 200
+    events = _parse_sse_events(resp.text)
+    done_events = [e for e in events if e["event"] == "done"]
+    assert len(done_events) == 1
+
+
+@pytest.mark.asyncio
 async def test_ask_stream_empty_query(override_deps):
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:

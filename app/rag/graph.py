@@ -3,6 +3,8 @@ import logging
 from typing import TypedDict, List, Dict
 from langgraph.graph import StateGraph, END
 
+from rag.retrieval import multi_query_retrieve
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,6 +14,7 @@ class RAGState(TypedDict):
     chunks: List[Dict]
     answer: str
     use_rerank: bool
+    use_multi_query: bool
     metadata: Dict
     is_safe: bool
     error: str
@@ -67,14 +70,22 @@ def create_rag_graph(retriever, generator, reranker, pii_scrubber, injection_gua
         logger.info(f"Retrieve node: query={state['query'][:50]}...")
 
         top_k = 20 if state.get("use_rerank", False) else 5
-        chunks = retriever.retrieve(state["query"], top_k=top_k)
+
+        if state.get("use_multi_query", False):
+            chunks = multi_query_retrieve(generator.llm, retriever, state["query"], top_k=top_k)
+            state["metadata"] = {
+                **state.get("metadata", {}),
+                "multi_query": True,
+                "retrieval_count": len(chunks),
+            }
+        else:
+            chunks = retriever.retrieve(state["query"], top_k=top_k)
+            state["metadata"] = {
+                **state.get("metadata", {}),
+                "retrieval_count": len(chunks),
+            }
 
         state["chunks"] = chunks
-        state["metadata"] = {
-            **state.get("metadata", {}),
-            "retrieval_count": len(chunks)
-        }
-
         logger.info(f"Retrieved {len(chunks)} chunks")
         return state
 
