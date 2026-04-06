@@ -75,7 +75,7 @@ class InjectionGuard:
         """Initialize injection patterns"""
         # Common injection patterns
         self.injection_patterns = [
-            r"ignore\s+(previous|above|all)\s+instructions?",
+            r"ignore\s+(all\s+)?(previous|above)?\s*instructions?",
             r"disregard\s+.*instructions?",
             r"forget\s+.*instructions?",
             r"you\s+are\s+now",

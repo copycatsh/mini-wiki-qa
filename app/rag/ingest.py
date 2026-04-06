@@ -143,8 +143,13 @@ def run_ingestion(embeddings, qdrant_url: str, collection_name: str, docs_dir: s
         Dict with documents_loaded and chunks_created counts
     """
     if docs_dir is None:
-        project_root = Path(__file__).parent.parent.parent
-        docs_dir = str(project_root / "data" / "documents" / "msmarco")
+        base = Path(__file__).parent.parent.parent / "data" / "documents"
+    for candidate in ["msmarco", "squad"]:
+        if (base / candidate).exists():
+            docs_dir = str(base / candidate)
+            break
+    else:
+        docs_dir = str(base)
 
     qdrant_client = QdrantClient(url=qdrant_url)
     ingester = DocumentIngester(embeddings, qdrant_client, qdrant_url, collection_name)
