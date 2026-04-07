@@ -2,6 +2,8 @@
 
 RAG-powered question answering over local documents. Semantic search, reranking, multi-query expansion, LangGraph safety pipeline, SSE streaming, and a chat UI.
 
+![Demo](data/demo.gif)
+
 ## Quick Start
 
 ```bash
