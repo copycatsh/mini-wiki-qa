@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # Vector DB
     QDRANT_URL: str = "http://qdrant:6333"
-    QDRANT_COLLECTION: str = "mini-wiki"
+    QDRANT_COLLECTION: str = "rag-playground"
 
     # Embeddings
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # MLflow
     MLFLOW_TRACKING_URI: str = "http://mlflow:5000"
-    MLFLOW_EXPERIMENT_NAME: str = "mini-wiki-rag"
+    MLFLOW_EXPERIMENT_NAME: str = "rag-playground-rag"
 
     # RAG
     CHUNK_SIZE: int = 500

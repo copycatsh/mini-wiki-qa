@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting Mini-Wiki Q&A API...")
+    logger.info("Starting Rag Playground API...")
     logger.info(f"LLM Backend: {settings.LLM_BACKEND}")
     logger.info(f"Qdrant URL: {settings.QDRANT_URL}")
     logger.info(f"MLflow URI: {settings.MLFLOW_TRACKING_URI}")
@@ -42,11 +42,11 @@ async def lifespan(app: FastAPI):
 
     logger.info("All RAG components initialized")
     yield
-    logger.info("Shutting down Mini-Wiki Q&A API...")
+    logger.info("Shutting down Rag Playground API...")
 
 
 app = FastAPI(
-    title="Mini-Wiki Q&A API",
+    title="Rag Playground API",
     description="RAG-based question answering system",
     version="0.1.0",
     lifespan=lifespan,

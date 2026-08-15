@@ -1,4 +1,4 @@
-"""Pydantic request/response schemas for the Mini-Wiki Q&A API."""
+"""Pydantic request/response schemas for the Rag Playground API."""
 
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional

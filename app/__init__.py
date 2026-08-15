@@ -1,1 +1,1 @@
-"""Mini-Wiki Q&A - RAG System"""
+"""Rag Playground - RAG System"""

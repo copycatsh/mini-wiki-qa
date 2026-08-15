@@ -184,4 +184,4 @@ volumes:
 
 networks:
   default:
-    name: mini-wiki-network
+    name: rag-playground-network

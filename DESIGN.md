@@ -1,4 +1,4 @@
-# Design System — Mini Wiki Q&A
+# Design System — Rag Playground
 
 ## Product Context
 - **What this is:** RAG-powered Q&A system that answers questions using local documents with semantic search, reranking, and LangGraph orchestration
@@ -96,14 +96,14 @@
 
 ### Message Layout
 - Full-width messages spanning the chat column, no bubbles or background tinting
-- "You" and "Mini Wiki" labels in 11px uppercase Geist above each message
+- "You" and "Rag Playground" labels in 11px uppercase Geist above each message
 - Dual-font strategy provides visual distinction (Geist for user, Source Sans 3 for AI)
 
 ## Interaction States
 
 ### Streaming (requires SSE backend)
 - User sends query → input disables, "Stop" button replaces "Send"
-- "Mini Wiki is thinking..." with pulsing dot animation (accent color, 1s cycle)
+- "Rag Playground is thinking..." with pulsing dot animation (accent color, 1s cycle)
 - Tokens stream in via SSE, rendered in Source Sans 3
 - After stream completes: citations accordion + metadata tags fade in (150ms)
 - If user clicks "Stop": partial response shown, metadata shows "stopped"
@@ -173,7 +173,7 @@
 
 ### Chat Messages
 - User messages: Geist font, 14px, 500 weight, full-width, "You" label above
-- AI messages: Source Sans 3, 15px, 400 weight, 1.7 line-height, full-width, "Mini Wiki" label above
+- AI messages: Source Sans 3, 15px, 400 weight, 1.7 line-height, full-width, "Rag Playground" label above
 - Message labels: 11px uppercase Geist, muted color, 6px bottom margin
 - Code inline: Geist Mono, 13px, code-bg background, 3px radius
 
@@ -225,7 +225,7 @@ MVP has no persistence. Page refresh clears chat. Sidebar is designed to accommo
 ## Decisions Log
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-04-04 | Initial design system created | Created by /design-consultation based on Claude.ai inspiration + competitive research of Perplexity, ChatGPT, Phind |
+| | Initial design system created | Created by /design-consultation based on Claude.ai inspiration + competitive research of Perplexity, ChatGPT, Phind |
 | 2026-04-04 | Instrument Serif for display | No AI chat uses serif for display. Gives academic "research library" feel that fits document Q&A. |
 | 2026-04-04 | Warm amber accent #C2713A | Avoids blue/purple developer tool default. Says "warm research tool" not "cold dev utility." |
 | 2026-04-04 | Dual-font body strategy | Source Sans 3 for AI responses (reading-optimized), Geist for UI chrome (interface-optimized). Subtle hierarchy. |

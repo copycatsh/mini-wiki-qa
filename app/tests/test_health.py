@@ -5,7 +5,7 @@ def test_root_returns_info(client):
     resp = client.get("/")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["message"] == "Mini-Wiki Q&A API"
+    assert data["message"] == "Rag Playground API"
     assert "docs" in data
     assert "health" in data
 

@@ -1,7 +1,6 @@
 # ADR-003: Qdrant Vector Store
 
 **Status:** Accepted
-**Date:** 2026-04-04
 
 ## Context
 
@@ -29,7 +28,7 @@ Qdrant **v1.10.0+** is required. The `langchain-qdrant 0.2.0` package uses the `
 
 ### Collection design
 
-One collection per project (`mini-wiki`). Cosine distance. 384-dimensional vectors (matching `all-MiniLM-L6-v2` embeddings).
+One collection per project (`rag-playground`). Cosine distance. 384-dimensional vectors (matching `all-MiniLM-L6-v2` embeddings).
 
 ## Consequences
 

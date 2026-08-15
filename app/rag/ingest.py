@@ -144,12 +144,12 @@ def run_ingestion(embeddings, qdrant_url: str, collection_name: str, docs_dir: s
     """
     if docs_dir is None:
         base = Path(__file__).parent.parent.parent / "data" / "documents"
-    for candidate in ["msmarco", "squad"]:
-        if (base / candidate).exists():
-            docs_dir = str(base / candidate)
-            break
-    else:
-        docs_dir = str(base)
+        for candidate in ["msmarco", "squad"]:
+            if (base / candidate).exists():
+                docs_dir = str(base / candidate)
+                break
+        else:
+            docs_dir = str(base)
 
     qdrant_client = QdrantClient(url=qdrant_url)
     ingester = DocumentIngester(embeddings, qdrant_client, qdrant_url, collection_name)
