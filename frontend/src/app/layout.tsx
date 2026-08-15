@@ -27,7 +27,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Mini Wiki Q&A",
+  title: "Rag Playground",
   description: "Ask your documents anything",
 };
 

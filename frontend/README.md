@@ -1,6 +1,6 @@
-# Mini-Wiki Q&A — Frontend
+# Rag Playground — Frontend
 
-Chat interface for the Mini-Wiki RAG system. Built with Next.js 14, React 18, shadcn/ui, and Tailwind CSS.
+Chat interface for the Rag Playground. Built with Next.js 14, React 18, shadcn/ui, and Tailwind CSS.
 
 ## Quick Start
 

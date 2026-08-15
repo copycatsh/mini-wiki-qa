@@ -14,7 +14,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className="w-full max-w-chat mx-auto">
       <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-muted mb-1.5">
-        {isUser ? "You" : "Mini Wiki"}
+        {isUser ? "You" : "Rag Playground"}
       </div>
 
       {isUser ? (

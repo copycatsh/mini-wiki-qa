@@ -10,7 +10,7 @@ YELLOW := \033[1;33m
 NC := \033[0m # No Color
 
 help: ## Show this help message
-	@echo "$(BLUE)Mini-Wiki Q&A - Available commands:$(NC)"
+	@echo "$(BLUE)Rag Playground - Available commands:$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}'
 
 setup: ## Initial setup (create .env from .env.example if missing)

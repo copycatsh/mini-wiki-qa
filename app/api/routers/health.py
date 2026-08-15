@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.get("/", tags=["Root"])
 async def root():
-    return {"message": "Mini-Wiki Q&A API", "docs": "/docs", "health": "/health"}
+    return {"message": "Rag Playground API", "docs": "/docs", "health": "/health"}
 
 
 @router.get("/health", response_model=HealthResponse, tags=["Health"])

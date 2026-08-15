@@ -14,7 +14,7 @@ interface SidebarProps {
 export function Sidebar({ pipeline, onPipelineChange, useRerank, onRerankChange, useMultiQuery, onMultiQueryChange }: SidebarProps) {
   return (
     <aside className="w-sidebar min-w-[240px] bg-sidebar border-r border-border px-4 py-5 flex flex-col gap-6 max-lg:hidden">
-      <p className="font-serif text-xl text-text">Mini Wiki Q&A</p>
+      <p className="font-serif text-xl text-text">Rag Playground</p>
 
       <div>
         <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-text-muted mb-2.5">Pipeline</div>

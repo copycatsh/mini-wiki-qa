@@ -1,5 +1,5 @@
 [project]
-name = "mini-wiki-qa"
+name = "rag-playground"
 version = "0.1.0"
 requires-python = ">=3.9"
 dependencies = []

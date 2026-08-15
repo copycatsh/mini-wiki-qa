@@ -18,7 +18,7 @@ export function MobileSettings({ pipeline, onPipelineChange, useRerank, onRerank
     <>
       {/* Mobile header - only visible below lg breakpoint */}
       <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-background">
-        <span className="font-serif text-lg text-text">Mini Wiki Q&A</span>
+        <span className="font-serif text-lg text-text">Rag Playground</span>
         <button
           onClick={() => setIsOpen(true)}
           className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-accent transition-colors"
